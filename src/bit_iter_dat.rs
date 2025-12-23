@@ -1,5 +1,6 @@
-// This is responsible for iterating bits in reverse byte order.
-pub struct ReverseBitIterator<'a> {
+// This iterates bits in the order required when parsing lemmings DAT files.
+// Order is reversed, and the first-returned byte has limited bits.
+pub struct BitIterDat<'a> {
     data: &'a [u8],
     byte_index: isize,
     bit: u8, // 0=lsb.
@@ -7,9 +8,9 @@ pub struct ReverseBitIterator<'a> {
     starting_byte_bits: u8,
 }
 
-impl<'a> ReverseBitIterator<'a> {
+impl<'a> BitIterDat<'a> {
     pub fn new(data: &'a [u8], starting_byte_bits: u8) -> Self {
-        ReverseBitIterator { data, byte_index: (data.len() - 1) as isize, bit: 0, is_starting_byte: true, starting_byte_bits }
+        BitIterDat { data, byte_index: (data.len() - 1) as isize, bit: 0, is_starting_byte: true, starting_byte_bits }
     }
 
     pub fn next_byte(&mut self) -> Option<u8> {
@@ -29,7 +30,7 @@ impl<'a> ReverseBitIterator<'a> {
     }
 }
 
-impl<'a> Iterator for ReverseBitIterator<'a> {
+impl<'a> Iterator for BitIterDat<'a> {
     type Item = bool;
     fn next(&mut self) -> Option<Self::Item> {
         let byte = self.data.get(self.byte_index as usize)?;
@@ -49,22 +50,22 @@ impl<'a> Iterator for ReverseBitIterator<'a> {
 mod tests {
     use super::*;
     #[test]
-    fn bititerator() {
+    fn bitBitIterDat() {
         let input: Vec<u8> = vec![0b00001111, 0];
 
-        let output1: Vec<bool> = ReverseBitIterator::new(&input, 1).collect();
+        let output1: Vec<bool> = BitIterDat::new(&input, 1).collect();
         assert_eq!(output1, vec![
             false,
             true, true, true, true, false, false, false, false,
         ]);
 
-        let output2: Vec<bool> = ReverseBitIterator::new(&input, 2).collect();
+        let output2: Vec<bool> = BitIterDat::new(&input, 2).collect();
         assert_eq!(output2, vec![
             false, false,
             true, true, true, true, false, false, false, false,
         ]);
 
-        let output8: Vec<bool> = ReverseBitIterator::new(&input, 8).collect();
+        let output8: Vec<bool> = BitIterDat::new(&input, 8).collect();
         assert_eq!(output8, vec![
             false, false, false, false, false, false, false, false,
             true, true, true, true, false, false, false, false,
@@ -74,13 +75,13 @@ mod tests {
     #[test]
     fn text_next_byte() {
         let input: Vec<u8> = vec![0b00001111, 0];
-        assert_eq!(ReverseBitIterator::new(&input, 1).next_byte().unwrap(), 0b01111000);
-        assert_eq!(ReverseBitIterator::new(&input, 2).next_byte().unwrap(), 0b00111100);
-        assert_eq!(ReverseBitIterator::new(&input, 3).next_byte().unwrap(), 0b00011110);
-        assert_eq!(ReverseBitIterator::new(&input, 4).next_byte().unwrap(), 0b00001111);
-        assert_eq!(ReverseBitIterator::new(&input, 5).next_byte().unwrap(), 0b00000111);
-        assert_eq!(ReverseBitIterator::new(&input, 6).next_byte().unwrap(), 0b00000011);
-        assert_eq!(ReverseBitIterator::new(&input, 7).next_byte().unwrap(), 0b00000001);
-        assert_eq!(ReverseBitIterator::new(&input, 8).next_byte().unwrap(), 0b00000000);
+        assert_eq!(BitIterDat::new(&input, 1).next_byte().unwrap(), 0b01111000);
+        assert_eq!(BitIterDat::new(&input, 2).next_byte().unwrap(), 0b00111100);
+        assert_eq!(BitIterDat::new(&input, 3).next_byte().unwrap(), 0b00011110);
+        assert_eq!(BitIterDat::new(&input, 4).next_byte().unwrap(), 0b00001111);
+        assert_eq!(BitIterDat::new(&input, 5).next_byte().unwrap(), 0b00000111);
+        assert_eq!(BitIterDat::new(&input, 6).next_byte().unwrap(), 0b00000011);
+        assert_eq!(BitIterDat::new(&input, 7).next_byte().unwrap(), 0b00000001);
+        assert_eq!(BitIterDat::new(&input, 8).next_byte().unwrap(), 0b00000000);
     }
 }
