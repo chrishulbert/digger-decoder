@@ -1,7 +1,7 @@
 // This is for decompressing lemmings DAT files:
 // https://www.camanis.net/lemmings/files/docs/lemmings_dat_file_format.txt
 
-use crate::reverse_bit_iterator;
+use crate::bit_iter_dat;
 
 // Decompresses a dat file into sections.
 pub fn decompress(dat: &[u8]) -> Vec<Vec<u8>> {
@@ -57,7 +57,7 @@ impl<'a> CompressedSection<'a> {
             vec[vec.len() - 1 - offset]
         }
 
-        let mut bits = reverse_bit_iterator::ReverseBitIterator::new(self.data, self.num_bits_in_first_byte);
+        let mut bits = bit_iter_dat::BitIterDat::new(self.data, self.num_bits_in_first_byte);
         let mut decompressed: Vec<u8> = Vec::new();
         while decompressed.len() < self.decompressed_data_size as usize {
             match bits.next().unwrap() {
