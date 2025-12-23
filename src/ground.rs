@@ -26,61 +26,14 @@ pub struct ObjectInfo {
 pub struct TerrainInfo {
     pub width: usize,
     pub height: usize,
-    pub image_loc: u16,
-    pub mask_loc: u16,
-}
-
-#[derive(Default, Clone)]
-pub struct Palettes {
-    pub ega: [u8; 8],
-    pub ega_standard: [u8; 8],
-    pub ega_preview: [u8; 8],
-    pub vga: [u32; 8], // RGB Palette entries 8...15. Only 6 bits so 0x3f = 100%
-    pub vga_standard: [u32; 8], // Doesn't seem to be used by the game.
-    pub vga_preview: [u32; 8], // Always seems to match custom.
-}
-
-// Upgrades a 6-bit colour to 8, while still allowing 100% black and white.
-fn colour_upgrade(six: u8) -> u8 {
-    if six == 0 { 0 } else { (six << 2) + 3 }
-}
-
-impl Palettes {
-    pub fn as_rgba(&self) -> [u32; 16] {
-        fn rgba_from_docs(rgb: u32) -> u32 {
-            let r6: u8 = (rgb >> 16) as u8;
-            let g6: u8 = (rgb >> 8) as u8; // 'as u8' simply truncates the red bits.
-            let b6: u8 = rgb as u8;
-            let r8: u8 = colour_upgrade(r6);
-            let g8: u8 = colour_upgrade(g6);
-            let b8: u8 = colour_upgrade(b6);
-            return ((r8 as u32) << 24) + ((g8 as u32) << 16) + ((b8 as u32) << 8) + 0xff;
-        }
-        [
-            rgba_from_docs(0x000000), // black.
-            rgba_from_docs(0x101038), // blue, used for the lemmings' bodies.
-            rgba_from_docs(0x002C00), // green, used for hair.
-            rgba_from_docs(0x3C3434), // white, used for skin.
-            rgba_from_docs(0x2C2C00), // dirty yellow, used in the skill panel.
-            rgba_from_docs(0x3C0808), // red, used in the nuke icon.
-            rgba_from_docs(0x202020), // gray, used in the skill panel.
-            self.vga[0], // Game duplicates custom[0] twice, oddly.
-            self.vga[0],
-            self.vga[1],
-            self.vga[2],
-            self.vga[3],
-            self.vga[4],
-            self.vga[5],
-            self.vga[6],
-            self.vga[7],
-        ]
-    }
+    pub image_loc: usize,
+    pub mask_loc: usize,
 }
 
 pub struct Ground {
     pub object_info: [ObjectInfo; 16],
     pub terrain_info: [TerrainInfo; 64],
-    pub palettes: Palettes,
+    pub palette: [u32; 16], // 0xrrggbbaa.
 }
 
 impl Default for Ground {
@@ -88,7 +41,7 @@ impl Default for Ground {
         Ground {
             object_info: Default::default(),
             terrain_info: [Default::default(); 64], // Default only auto-derives up to 32 element arrays.
-            palettes: Default::default(),
+            palette: Default::default(),
         }
     }
 }
@@ -124,44 +77,75 @@ impl Ground {
         for i in 0..64 {
             ground.terrain_info[i].width = *data_iter.next().unwrap() as usize;
             ground.terrain_info[i].height = *data_iter.next().unwrap() as usize;
-            ground.terrain_info[i].image_loc = read_u16(&mut data_iter);
-            ground.terrain_info[i].mask_loc = read_u16(&mut data_iter);
+            ground.terrain_info[i].image_loc = read_u16(&mut data_iter) as usize;
+            ground.terrain_info[i].mask_loc = read_u16(&mut data_iter) as usize;
             let _unknown = read_u16(&mut data_iter);
         }
-        for i in 0..8 {
-            ground.palettes.ega[i] = *data_iter.next().unwrap();
+        for _ in 0..24 {
+            let _ = *data_iter.next().unwrap(); // ega.
         }
+        let mut upper_palette: [u32; 8] = [0; 8];
         for i in 0..8 {
-            ground.palettes.ega_standard[i] = *data_iter.next().unwrap();
+            upper_palette[i] = read_rgb(&mut data_iter);
         }
-        for i in 0..8 {
-            ground.palettes.ega_preview[i] = *data_iter.next().unwrap();
-        }
-        for i in 0..8 {
-            ground.palettes.vga[i] = read_rgb(&mut data_iter);
-        }
-        for i in 0..8 {
-            ground.palettes.vga_standard[i] = read_rgb(&mut data_iter);
-        }
-        for i in 0..8 {
-            ground.palettes.vga_preview[i] = read_rgb(&mut data_iter);
+        ground.palette = extend_palette(upper_palette);
+        for _ in 0..16 { // vga standard/preview.
+            let _ = *data_iter.next().unwrap(); // r.
+            let _ = *data_iter.next().unwrap(); // g.
+            let _ = *data_iter.next().unwrap(); // b.
         }
         ground
     }
 }
 
 // Unlike the .LVL file format, WORDs in groundXo.dat are stored little-endian (camanis.net).
-fn read_u16<I>(data: &mut I) -> u16
-where I: Iterator<Item = &u8> {
+fn read_u16<'a, I>(data: &mut I) -> u16
+where I: Iterator<Item = &'a u8> {
     let little = *data.next().unwrap();
     let big = *data.next().unwrap();
     return ((big as u16) << 8) + (little as u16);
 }
 
+// Upgrades a 6-bit colour to 8, while still allowing 100% black and white.
+fn colour_upgrade(six: u8) -> u8 {
+    if six == 0 { 0 } else { (six << 2) + 3 }
+}
+
+// Extends an upper palette to the full one.
+fn extend_palette(upper_palette: [u32; 8]) -> [u32; 16] {
+    fn rgba_from_docs(rgb: u32) -> u32 {
+        let r6: u8 = (rgb >> 16) as u8;
+        let g6: u8 = (rgb >> 8) as u8; // 'as u8' simply truncates the red bits.
+        let b6: u8 = rgb as u8;
+        let r8: u8 = colour_upgrade(r6);
+        let g8: u8 = colour_upgrade(g6);
+        let b8: u8 = colour_upgrade(b6);
+        return ((r8 as u32) << 24) + ((g8 as u32) << 16) + ((b8 as u32) << 8) + 0xff;
+    }
+    [
+        rgba_from_docs(0x000000), // black.
+        rgba_from_docs(0x101038), // blue, used for the lemmings' bodies.
+        rgba_from_docs(0x002C00), // green, used for hair.
+        rgba_from_docs(0x3C3434), // white, used for skin.
+        rgba_from_docs(0x2C2C00), // dirty yellow, used in the skill panel.
+        rgba_from_docs(0x3C0808), // red, used in the nuke icon.
+        rgba_from_docs(0x202020), // gray, used in the skill panel.
+        upper_palette[0], // Game duplicates custom[0] twice, oddly.
+        upper_palette[0],
+        upper_palette[1],
+        upper_palette[2],
+        upper_palette[3],
+        upper_palette[4],
+        upper_palette[5],
+        upper_palette[6],
+        upper_palette[7],
+    ]
+}
+
 // Read 3 RGB bytes, converting to 0-255 RGBA format
 // Source file: (0x3F, 0x00, 0x00) gives you the brightest red you can get (camanis.net)
-fn read_rgb<I>(data: &mut I) -> u32
-where I: Iterator<Item = &u8> {
+fn read_rgb<'a, I>(data: &mut I) -> u32
+where I: Iterator<Item = &'a u8> {
     let r6 = *data.next().unwrap();
     let g6 = *data.next().unwrap();
     let b6 = *data.next().unwrap();
