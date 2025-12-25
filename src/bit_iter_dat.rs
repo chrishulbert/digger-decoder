@@ -10,6 +10,9 @@ pub struct BitIterDat<'a> {
 
 impl<'a> BitIterDat<'a> {
     pub fn new(data: &'a [u8], starting_byte_bits: u8) -> Self {
+        if starting_byte_bits == 0 { // Skip initial (at end) byte for weirdly-compressed sections.
+            return BitIterDat { data, byte_index: (data.len() - 2) as isize, bit: 0, is_starting_byte: true, starting_byte_bits: 8 }
+        }
         BitIterDat { data, byte_index: (data.len() - 1) as isize, bit: 0, is_starting_byte: true, starting_byte_bits }
     }
 
