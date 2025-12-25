@@ -92,6 +92,11 @@ fn append_msb(vec: &mut Vec<u8>, value: u32) {
     vec.push((value & 0xff) as u8);
 }
 
+fn append_msb_u16(vec: &mut Vec<u8>, value: u16) {
+    vec.push(((value >> 8) & 0xff) as u8);
+    vec.push((value & 0xff) as u8);
+}
+
 // https://en.wikipedia.org/wiki/Portable_Network_Graphics#File_format
 pub fn png_data(width: u32, height: u32, image_data: &[u32]) -> Vec<u8> {
     let mut output = Vec::<u8>::new();
@@ -152,6 +157,129 @@ pub fn png_data(width: u32, height: u32, image_data: &[u32]) -> Vec<u8> {
     append_msb(&mut output, idat_len as u32);
     output.extend_from_slice(&idat_type_and_data);
     append_msb(&mut output, idat_crc);
+
+    // IEND (no data).
+    append_msb(&mut output, 0); // Length.
+    output.push(b'I'); // Type.
+    output.push(b'E');
+    output.push(b'N');
+    output.push(b'D');
+    let iend_crc = crc(b"IEND");
+    append_msb(&mut output, iend_crc);
+
+    output
+}
+
+// https://en.wikipedia.org/wiki/APNG#File_format
+pub fn apng_data(width: u32, height: u32, frames: &[Vec<u32>]) -> Vec<u8> {
+    let mut output = Vec::<u8>::new();
+
+    // Header.
+    output.push(0x89);
+    output.push(b'P');
+    output.push(b'N');
+    output.push(b'G');
+    output.push(0x0d); // Cr
+    output.push(0x0a); // Lf
+    output.push(0x1a); // Eof
+    output.push(0x0a); // Lf
+
+    // Build IHDR.
+    let mut ihdr_type_and_data = Vec::<u8>::new();
+    ihdr_type_and_data.push(b'I');
+    ihdr_type_and_data.push(b'H');
+    ihdr_type_and_data.push(b'D');
+    ihdr_type_and_data.push(b'R');
+    append_msb(&mut ihdr_type_and_data, width);
+    append_msb(&mut ihdr_type_and_data, height);
+    ihdr_type_and_data.push(8); // 8bpp.
+    ihdr_type_and_data.push(6); // RGBA.
+    ihdr_type_and_data.push(0); // Compression method: zlib.
+    ihdr_type_and_data.push(0); // Filter method.
+    ihdr_type_and_data.push(0); // No interlace.
+    let ihdr_len = ihdr_type_and_data.len() - 4; // Minus the type.
+    let ihdr_crc = crc(&ihdr_type_and_data);
+    // Append IHDR to output.
+    append_msb(&mut output, ihdr_len as u32);
+    output.extend_from_slice(&ihdr_type_and_data);
+    append_msb(&mut output, ihdr_crc);
+
+    // acTL: (just one)
+    // https://wiki.mozilla.org/APNG_Specification#%60acTL%60:_The_Animation_Control_Chunk
+    let mut actl_type_and_data = Vec::<u8>::new();
+    actl_type_and_data.push(b'a');
+    actl_type_and_data.push(b'c');
+    actl_type_and_data.push(b'T');
+    actl_type_and_data.push(b'L');
+    append_msb(&mut actl_type_and_data, frames.len() as u32); // Number of frames.
+    append_msb(&mut actl_type_and_data, 0); // Number of times to loop, 0=infinite.
+    let actl_len = actl_type_and_data.len() - 4; // Minus the type.
+    let actl_crc = crc(&actl_type_and_data);
+    // Append acTL to output.
+    append_msb(&mut output, actl_len as u32);
+    output.extend_from_slice(&actl_type_and_data);
+    append_msb(&mut output, actl_crc);
+
+    for (index, frame) in frames.iter().enumerate() {
+        // fcTL: (before each frame)
+        // https://wiki.mozilla.org/APNG_Specification#%60fcTL%60:_The_Frame_Control_Chunk
+        let mut fctl_type_and_data = Vec::<u8>::new();
+        fctl_type_and_data.push(b'f');
+        fctl_type_and_data.push(b'c');
+        fctl_type_and_data.push(b'T');
+        fctl_type_and_data.push(b'L');
+        let fctl_sequence: u32 = if index == 0 { 0 } else { (index as u32) * 2 - 1 };
+        append_msb(&mut fctl_type_and_data, fctl_sequence); // Sequence number starting 0.
+        append_msb(&mut fctl_type_and_data, width);
+        append_msb(&mut fctl_type_and_data, height);
+        append_msb(&mut fctl_type_and_data, 0); // X-offset.
+        append_msb(&mut fctl_type_and_data, 0); // Y-offset.
+        append_msb_u16(&mut fctl_type_and_data, 10); // Delay numerator.
+        append_msb_u16(&mut fctl_type_and_data, 0); // Delay denominator. 0 means each value is 100ths of a second.
+        fctl_type_and_data.push(1); // Dispose operation. 1 means each frame gets a blank canvas.
+        fctl_type_and_data.push(0); // Blend operation. 0 means all components overwrite.
+        let fctl_len = fctl_type_and_data.len() - 4; // Minus the type.
+        let fctl_crc = crc(&fctl_type_and_data);
+        // Append fctl to output.
+        append_msb(&mut output, fctl_len as u32);
+        output.extend_from_slice(&fctl_type_and_data);
+        append_msb(&mut output, fctl_crc);
+
+        // Build image data.
+        // Left-right, then Top-bottom.
+        // Each line is prepended a filter type byte (0).
+        let mut idat_data = Vec::<u8>::new();
+        let mut data_iter = frame.iter();
+        for _y in 0..height {
+            idat_data.push(0); // Filter.
+            for _x in 0..width {
+                append_msb(&mut idat_data, *data_iter.next().unwrap());
+            }
+        }
+        let compressed_idat_data = to_zlib_stream(&idat_data);
+
+        // Build IDAT (first) / fdAT (subsequent frames).
+        let mut idat_type_and_data = Vec::<u8>::new();
+        if index == 0 {
+            idat_type_and_data.push(b'I');
+            idat_type_and_data.push(b'D');
+            idat_type_and_data.push(b'A');
+            idat_type_and_data.push(b'T');
+        } else {
+            idat_type_and_data.push(b'f');
+            idat_type_and_data.push(b'd');
+            idat_type_and_data.push(b'A');
+            idat_type_and_data.push(b'T');
+            append_msb(&mut idat_type_and_data, (index as u32) * 2);
+        }
+        idat_type_and_data.extend_from_slice(&compressed_idat_data);
+        let idat_len = idat_type_and_data.len() - 4; // Minus the type.
+        let idat_crc = crc(&idat_type_and_data);
+        // Append IDAT to output.
+        append_msb(&mut output, idat_len as u32);
+        output.extend_from_slice(&idat_type_and_data);
+        append_msb(&mut output, idat_crc);
+    }
 
     // IEND (no data).
     append_msb(&mut output, 0); // Length.

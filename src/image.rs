@@ -88,25 +88,7 @@ impl Image {
     }
 
     pub fn parse_4bpp_plus_mask(data: &[u8], width: usize, height: usize, image_loc: usize, mask_loc: usize, palette: &[u32; 16]) -> Image {
-        let image_data: &[u8] = &data[image_loc..];
-        let mask_data: &[u8] = &data[mask_loc..];
-        let pixels = width * height;
-        let mut plane_0 = bit_iter_ms_first::iterate(image_data);
-        let mut plane_1 = bit_iter_ms_first::iterate(image_data).skip(pixels);
-        let mut plane_2 = bit_iter_ms_first::iterate(image_data).skip(pixels * 2);
-        let mut plane_3 = bit_iter_ms_first::iterate(image_data).skip(pixels * 3);
-        let mut mask_iter = bit_iter_ms_first::iterate(mask_data);
-        let mut bitmap: Vec<u32> = Vec::with_capacity(pixels);
-        for _ in 0..pixels {
-            let colour_index =
-                plane_0.next().unwrap() +
-                (plane_1.next().unwrap() << 1) +
-                (plane_2.next().unwrap() << 2) +
-                (plane_3.next().unwrap() << 3);
-            let colour = palette[colour_index as usize];
-            let masked_colour: u32 = if mask_iter.next().unwrap() == 0 { 0 } else { colour };
-            bitmap.push(masked_colour);
-        }
+        let bitmap = parse_4bpp_plus_mask_frame(data, width, height, image_loc, mask_loc, palette);
         return Image { bitmap: bitmap, width: width, height: height };
     }
 
@@ -122,4 +104,48 @@ impl Image {
     pub fn as_png(&self) -> Vec<u8> {
         png::png_data(self.width as u32, self.height as u32, &self.bitmap)
     }
+}
+
+impl Animation {
+    pub fn parse_4bpp_plus_mask(data: &[u8], width: usize, height: usize, image_loc: usize, mask_loc: usize, palette: &[u32; 16], stride: usize, frame_count: usize) -> Animation {
+        let mut frames: Vec<Vec<u32>> = Vec::new();
+        for i in 0..frame_count {
+            let offset = stride * i;
+            let frame = parse_4bpp_plus_mask_frame(data, width, height, offset + image_loc, offset + mask_loc, palette);
+            frames.push(frame);
+        }
+        Animation {
+            frames: frames,
+            width: width,
+            height: height,
+        }
+    }
+
+    pub fn as_apng(&self) -> Vec<u8> {
+        png::apng_data(self.width as u32, self.height as u32, &self.frames)
+    }
+}
+
+// Helpers used for both images and animations:
+pub fn parse_4bpp_plus_mask_frame(data: &[u8], width: usize, height: usize, image_loc: usize, mask_loc: usize, palette: &[u32; 16]) -> Vec<u32> {
+    let image_data: &[u8] = &data[image_loc..];
+    let mask_data: &[u8] = &data[mask_loc..];
+    let pixels = width * height;
+    let mut plane_0 = bit_iter_ms_first::iterate(image_data);
+    let mut plane_1 = bit_iter_ms_first::iterate(image_data).skip(pixels);
+    let mut plane_2 = bit_iter_ms_first::iterate(image_data).skip(pixels * 2);
+    let mut plane_3 = bit_iter_ms_first::iterate(image_data).skip(pixels * 3);
+    let mut mask_iter = bit_iter_ms_first::iterate(mask_data);
+    let mut bitmap: Vec<u32> = Vec::with_capacity(pixels);
+    for _ in 0..pixels {
+        let colour_index =
+            plane_0.next().unwrap() +
+            (plane_1.next().unwrap() << 1) +
+            (plane_2.next().unwrap() << 2) +
+            (plane_3.next().unwrap() << 3);
+        let colour = palette[colour_index as usize];
+        let masked_colour: u32 = if mask_iter.next().unwrap() == 0 { 0 } else { colour };
+        bitmap.push(masked_colour);
+    }
+    bitmap
 }
