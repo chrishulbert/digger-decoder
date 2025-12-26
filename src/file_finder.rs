@@ -9,6 +9,10 @@ pub struct File {
 
 // Starts_with and ends_width should be lowercase. Eg 'vgagr' and '.dat' respectively.
 pub fn find(folder: &str, starts_with: &str, ends_width: &str) -> Result<Vec<File>> {
+    find_2(folder, starts_with, None, ends_width)
+}
+
+pub fn find_2(folder: &str, starts_with: &str, starts_with_2: Option<&str>, ends_width: &str) -> Result<Vec<File>> {
     let mut files: Vec<File> = Vec::new();
     let entries = std::fs::read_dir(folder)?;
     for entry in entries {
@@ -16,7 +20,14 @@ pub fn find(folder: &str, starts_with: &str, ends_width: &str) -> Result<Vec<Fil
         let path = entry.path().to_string_lossy().to_string();
         let name = entry.file_name().to_string_lossy().to_string();
         let lower_name = name.to_lowercase();
-        if lower_name.starts_with(starts_with) && lower_name.ends_with(ends_width) {
+        let has_start =
+            if let Some(starts_with_2) = starts_with_2 {
+                lower_name.starts_with(starts_with) ||
+                    lower_name.starts_with(starts_with_2)
+            } else {
+                lower_name.starts_with(starts_with)
+            };
+        if has_start && lower_name.ends_with(ends_width) {
             let number = number_ignoring_non_digits(&name);
             let data = std::fs::read(&path)?;
             files.push(File { path, name, number, data });
