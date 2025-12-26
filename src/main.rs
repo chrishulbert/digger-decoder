@@ -5,6 +5,7 @@ mod ground;
 mod image;
 mod png;
 mod level;
+mod file_finder;
 
 use std::fs;
 use anyhow::Result;

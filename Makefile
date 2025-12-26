@@ -7,6 +7,9 @@ build:
 run:
 	cargo run
 
+test:
+	cargo test
+
 clean:
 	-rm output_*.png
 
