@@ -29,7 +29,7 @@ fn main() -> Result<()> {
     for (i, level) in levels.iter().enumerate() {
         let image = level_renderer::render(&level, &grounds);
         let png = image.as_png();
-        let name = format!("output_level{}_{}.png", i, level.name);
+        let name = format!("output_level{}_{}.static.png", i, level.name);
         std::fs::write(name, png)?;
     }
     println!("Levels: {}", levels.len());
