@@ -8,6 +8,7 @@ mod png;
 mod level;
 mod levels_loader;
 mod file_finder;
+mod level_renderer;
 
 use anyhow::Result;
 
@@ -25,8 +26,11 @@ fn main() -> Result<()> {
     let grounds = grounds_loader::load(path)?;
     let levels = levels_loader::load(path)?;
 
-    for l in &levels {
-        println!("Level: {}", l.name);
+    for (i, level) in levels.iter().enumerate() {
+        let image = level_renderer::render(&level, &grounds);
+        let png = image.as_png();
+        let name = format!("output_level{}_{}.png", i, level.name);
+        std::fs::write(name, png)?;
     }
     println!("Levels: {}", levels.len());
 
