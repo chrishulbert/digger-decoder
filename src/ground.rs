@@ -1,6 +1,13 @@
 // This is for parsing lemmings GROUND files:
 // https://www.camanis.net/lemmings/files/docs/lemmings_vgagrx_dat_groundxo_dat_file_format.txt
 
+// A 'ground' represents the metadata for a graphics set eg 'hell' or 'pink'.
+pub struct Ground {
+    pub object_info: [ObjectInfo; 16],
+    pub terrain_info: [TerrainInfo; 64],
+    pub palette: [u32; 16], // 0xrrggbbaa.
+}
+
 #[derive(Default, Debug, Clone)]
 pub struct ObjectInfo {
     pub is_exit: bool, // According to lemmings_lvl_file_format.txt, the first object for any ground is always exit, second is entrance.
@@ -28,12 +35,6 @@ pub struct TerrainInfo {
     pub height: usize,
     pub image_loc: usize,
     pub mask_loc: usize,
-}
-
-pub struct Ground {
-    pub object_info: [ObjectInfo; 16],
-    pub terrain_info: [TerrainInfo; 64],
-    pub palette: [u32; 16], // 0xrrggbbaa.
 }
 
 impl Default for Ground {
