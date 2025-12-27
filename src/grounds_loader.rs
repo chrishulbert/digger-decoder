@@ -26,9 +26,10 @@ pub fn load(path: &str) -> Result<HashMap<u32, GroundWithImages>> {
         for (i, object) in ground.object_info.iter().enumerate() {
             if object.width == 0 || object.height == 0 || object.frame_count == 0 { continue }
             let animation = image::Animation::parse_4bpp_plus_mask(&vgagr[1], object.width, object.height,
+                object.frame_count as usize,
                 object.animation_frames_base_loc as usize,
                 object.animation_frames_base_loc as usize + object.mask_offset_from_image as usize,
-                &ground.palette, object.animation_frame_data_size as usize, object.frame_count as usize);
+                &ground.palette, object.animation_frame_data_size as usize);
             objects.insert(i, animation);
         }
 
