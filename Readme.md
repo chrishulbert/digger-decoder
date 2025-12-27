@@ -1,6 +1,6 @@
 # Digger Decoder
 
-![Digger](https://github.com/chrishulbert/digger-decoder/blob/main/readme/digger.png?raw=true)
+![Digging](https://github.com/chrishulbert/digger-decoder/blob/main/readme/digging.png?raw=true)
 
 This is a tool for decoding all the images/animations/maps from classic DOS Lemmings :)
 
