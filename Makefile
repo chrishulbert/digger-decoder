@@ -5,7 +5,22 @@ build:
 	cargo build
 
 run:
-	cargo run
+	cargo run data/lemmings
+	
+run-ohnomore:
+	cargo run data/ohnomore
+
+run-christmas91:
+	cargo run data/christmas91
+
+run-christmas92:
+	cargo run data/christmas92
+
+run-holidays93:
+	cargo run data/holidays93
+
+run-holidays94:
+	cargo run data/holidays94
 
 test:
 	cargo test

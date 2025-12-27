@@ -16,8 +16,18 @@ mod maindat;
 use anyhow::Result;
 
 fn main() -> Result<()> {
-    let path = "data/lemmings";
+    println!("-=[ Digger Decoder ]=-");
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() < 2 {
+        println!("Usage:");
+        println!("digger-decoder data/lemmings");
+    } else {
+        decode(&args[1])?;
+    }
+    Ok(())
+}
 
+fn decode(path: &str) -> Result<()> {
     println!("Loading main...");
     let maindat = maindat::MainDat::load(path)?;
     println!("Loading grounds...");

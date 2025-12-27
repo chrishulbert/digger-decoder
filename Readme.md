@@ -9,7 +9,13 @@ This is a tool for decoding all the images/animations/maps from classic DOS Lemm
 ![Mining](https://github.com/chrishulbert/digger-decoder/raw/main/readme/mining.png?raw=true)
 
 * Check out the repo
-* Run 'make run' to extract all the files
+* Run 'make run' to extract all the files from the OG lemmings
+* You can also run other lemmings:
+    * make run-ohnomore
+    * make run-christmas91
+    * make run-christmas92
+    * make run-holidays93
+    * make run-holidays94
 
 ## Animations
 
