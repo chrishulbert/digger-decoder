@@ -1,19 +1,19 @@
 # Digger Decoder
 
-![Digging](https://github.com/chrishulbert/digger-decoder/blob/main/readme/digging.png?raw=true)
+![Digging](https://github.com/chrishulbert/digger-decoder/raw/main/readme/digging.png?raw=true)
 
 This is a tool for decoding all the images/animations/maps from classic DOS Lemmings :)
 
 ## How to use
 
-![Mining](https://github.com/chrishulbert/digger-decoder/blob/main/readme/mining.png?raw=true)
+![Mining](https://github.com/chrishulbert/digger-decoder/raw/main/readme/mining.png?raw=true)
 
 * Check out the repo
 * Run 'make run' to extract all the files
 
 ## Animations
 
-![Bricklaying](https://github.com/chrishulbert/digger-decoder/blob/main/readme/bricklaying.png?raw=true)
+![Bricklaying](https://github.com/chrishulbert/digger-decoder/raw/main/readme/bricklaying.png?raw=true)
 
 This outputs uncompressed PNG / APNG files. If that concerns you, you can compress them like so:
 
@@ -30,3 +30,9 @@ Animations are quite small, to embiggen them you can:
 ![Dopefish](https://github.com/chrishulbert/dopefish-decoder/raw/main/Dopefish.png?raw=true)
 
 If you love Commander Keen, please check out my [Dopefish decoder](https://github.com/chrishulbert/dopefish-decoder) too :)
+
+## Docs
+
+![Kessel](https://github.com/chrishulbert/digger-decoder/raw/main/readme/thesteelminesofkessel.png?raw=true)
+
+Thanks to [camanis.net](https://www.camanis.net/lemmings/files/docs/) for documenting the file formats.
