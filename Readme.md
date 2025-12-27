@@ -2,7 +2,7 @@
 
 ![Digging](https://github.com/chrishulbert/digger-decoder/raw/main/readme/digging.png?raw=true)
 
-This is a tool for decoding all the images/animations/maps from classic DOS Lemmings :)
+This is a written-in-Rust tool for decoding all the images/animations/maps from classic DOS Lemmings :)
 
 ## How to use
 
