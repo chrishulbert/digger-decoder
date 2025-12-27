@@ -14,10 +14,13 @@ pub struct MainDat {
     pub masks: Masks,
     pub countdown_numbers: [Image; 10],
     pub skill_panel_high_perf: Image,
+    #[allow(dead_code)]
     pub skill_number_digits: SkillNumberDigits,
     pub game_font_high_perf: GameFont,
     pub main_menu: MainMenu,
+    #[allow(dead_code)]
     pub skill_panel: Image,
+    #[allow(dead_code)]
     pub game_font: GameFont,
 }
 
@@ -60,13 +63,12 @@ pub struct GameFont {
     pub letters: [Image; 26], // A-Z
 }
 
-// #[derive(Clone)]
+#[allow(dead_code)]
 pub struct SkillNumberDigits {
     pub left: [Image; 10],
     pub right: [Image; 10],
 }
 
-// #[derive(Clone)]
 pub struct LemmingAnimations {
     pub walking_right: Animation,
     pub jumping_right: Animation, // Walking up a step 3-6px tall. This is a 1-frame 'animation'.

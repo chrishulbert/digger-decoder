@@ -80,6 +80,7 @@ pub struct Terrain {
 }
 
 #[derive(Default, Debug)]
+#[allow(dead_code)]
 pub struct SteelArea {
     pub x: isize, // Normalised.
         // In file: min 0x000, max 0xC78.  0x000 = -16, 0x008 = -12,

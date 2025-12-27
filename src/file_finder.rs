@@ -1,7 +1,9 @@
 use anyhow::Result;
 
 pub struct File {
+    #[allow(dead_code)]
     pub path: String, // /path/to/file123.ext
+    #[allow(dead_code)]
     pub name: String, // file123.ext
     pub number: u32, // 123
     pub data: Vec<u8>,
