@@ -23,7 +23,7 @@ This outputs uncompressed PNG / APNG files. If that concerns you, you can compre
 
 Animations are quite small, to embiggen them you can:
 
-    ffmpeg -i walking.png -vf "scale=iw*4:ih*4:flags=neighbor" walking.apng
+    ffmpeg -i walking.png -vf "scale=iw*4:ih*4:flags=neighbor" -plays 0 walking.apng
 
 ## See also
 
