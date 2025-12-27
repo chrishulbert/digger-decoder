@@ -1,4 +1,3 @@
-use crate::ground;
 use crate::image;
 use crate::level;
 use crate::grounds_loader;
@@ -102,9 +101,11 @@ fn draw(sprite: &[u32],
     }
 }
 
-pub fn render(level: &level::Level, grounds: &HashMap<u32, grounds_loader::GroundWithImages>,
-    //specials: &SpecialMap,
-    ) -> image::Image {
+pub fn render(
+    level: &level::Level,
+    grounds: &HashMap<u32, grounds_loader::GroundWithImages>,
+    specials: &HashMap<u32, image::Image>,
+) -> image::Image {
     let size = LevelSize::from_level(level, grounds);
     let width = size.width();
     let height = LEVEL_HEIGHT;
@@ -125,8 +126,8 @@ pub fn render(level: &level::Level, grounds: &HashMap<u32, grounds_loader::Groun
                 false);
         }
     } else {
-        // let special = &specials[&(level.globals.extended_graphic_set as i32 - 1)];
-        // bitmap.copy_from_slice(&special.bitmap);
+        let special = &specials[&(level.globals.extended_graphic_set as u32 - 1)];
+        bitmap.copy_from_slice(&special.bitmap);
     }
     for object in level.objects.iter() {
         let anim = &ground.objects[&object.obj_id];
