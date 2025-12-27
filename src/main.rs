@@ -94,20 +94,21 @@ fn main() -> Result<()> {
             image.as_png())?;
     }
 
-    std::fs::write("output_main_font_percent.static.png", maindat.game_font_high_perf.percent.as_png())?;
-    std::fs::write("output_main_font_dash.static.png", maindat.game_font_high_perf.dash.as_png())?;
-    for (i, im) in maindat.game_font_high_perf.digits.iter().enumerate() {
+    std::fs::write("output_main_font_percent.static.png", maindat.game_font.percent.as_png())?;
+    std::fs::write("output_main_font_dash.static.png", maindat.game_font.dash.as_png())?;
+    for (i, im) in maindat.game_font.digits.iter().enumerate() {
         std::fs::write(
             format!("output_main_font_digit{}.static.png", i),
             im.as_png())?;
     }
-    for (i, im) in maindat.game_font_high_perf.letters.iter().enumerate() {
+    for (i, im) in maindat.game_font.letters.iter().enumerate() {
         std::fs::write(
             format!("output_main_font_letter{}.static.png", i),
             im.as_png())?;
     }
 
-    std::fs::write("output_main_skill_panel.static.png", maindat.skill_panel_high_perf.as_png())?;
+    std::fs::write("output_main_skill_panel_high.static.png", maindat.skill_panel_high_perf.as_png())?;
+    std::fs::write("output_main_skill_panel.static.png", maindat.skill_panel.as_png())?;
 
     std::fs::write("output_main_menu_background.static.png", maindat.main_menu.background.as_png())?;
     std::fs::write("output_main_menu_logo.static.png", maindat.main_menu.logo.as_png())?;

@@ -16,11 +16,10 @@ pub struct MainDat {
     pub skill_panel_high_perf: Image,
     #[allow(dead_code)]
     pub skill_number_digits: SkillNumberDigits,
+    #[allow(dead_code)]
     pub game_font_high_perf: GameFont,
     pub main_menu: MainMenu,
-    #[allow(dead_code)]
     pub skill_panel: Image,
-    #[allow(dead_code)]
     pub game_font: GameFont,
 }
 
@@ -247,7 +246,7 @@ impl GameFont {
 impl MainMenu {
     fn parse(section_3: &[u8], section_4: &[u8], palette: &[u32; 16]) -> MainMenu {
         let mut back_palette = palette.clone(); // Make 0 solid black, not transparent, for the background.
-        back_palette[0] = 0xff000000;
+        back_palette[0] = 0x000000ff;
         MainMenu {
             background:     Image::parse_2bpp(&section_3, 320, 104, &back_palette),
             logo:           Image::parse_4bpp(&section_3[0x2080..], 632, 94, palette),
@@ -259,21 +258,21 @@ impl MainMenu {
             exit_to_dos:    Image::parse_4bpp(&section_3[0xCDB8..], 120, 61, palette),
             music_note:     Image::parse_4bpp(&section_3[0xEA50..], 64, 31, palette),
             fx:             Image::parse_4bpp(&section_3[0xEE30..], 64, 31, palette),
-            blink1:         Animation::parse(&section_4[0x0000..], 8, 32, 12, palette, 4),
-            blink2:         Animation::parse(&section_4[0x0600..], 8, 32, 12, palette, 4),
-            blink3:         Animation::parse(&section_4[0x0C00..], 8, 32, 12, palette, 4),
-            blink4:         Animation::parse(&section_4[0x1200..], 8, 32, 12, palette, 4),
-            blink5:         Animation::parse(&section_4[0x1800..], 8, 32, 12, palette, 4),
-            blink6:         Animation::parse(&section_4[0x1E00..], 8, 32, 12, palette, 4),
-            blink7:         Animation::parse(&section_4[0x2400..], 8, 32, 12, palette, 4),
-            left_scroller:  Animation::parse(&section_4[0x2A00..], 16, 48, 16, palette, 4),
-            right_scroller: Animation::parse(&section_4[0x4200..], 16, 48, 16, palette, 4),
+            blink1:         Animation::parse(&section_4[0x0000..], 32, 12, 8, palette, 4),
+            blink2:         Animation::parse(&section_4[0x0600..], 32, 12, 8, palette, 4),
+            blink3:         Animation::parse(&section_4[0x0C00..], 32, 12, 8, palette, 4),
+            blink4:         Animation::parse(&section_4[0x1200..], 32, 12, 8, palette, 4),
+            blink5:         Animation::parse(&section_4[0x1800..], 32, 12, 8, palette, 4),
+            blink6:         Animation::parse(&section_4[0x1E00..], 32, 12, 8, palette, 4),
+            blink7:         Animation::parse(&section_4[0x2400..], 32, 12, 8, palette, 4),
+            left_scroller:  Animation::parse(&section_4[0x2A00..], 48, 16, 16, palette, 4),
+            right_scroller: Animation::parse(&section_4[0x4200..], 48, 16, 16, palette, 4),
             reel:           Image::parse_4bpp(&section_4[0x5A00..], 16, 16, palette),
             mayhem:         Image::parse_4bpp(&section_4[0x5A80..], 72, 27, &back_palette),
             taxing:         Image::parse_4bpp(&section_4[0x5E4C..], 72, 27, &back_palette),
             tricky:         Image::parse_4bpp(&section_4[0x6218..], 72, 27, &back_palette),
             fun:            Image::parse_4bpp(&section_4[0x65E4..], 72, 27, &back_palette),
-            menu_font:      Animation::parse(&section_4[0x69B0..], 94, 16, 16, palette, 3),
+            menu_font:      Animation::parse(&section_4[0x69B0..], 16, 16, 94, palette, 3),
         }
     }
 }
