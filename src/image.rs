@@ -16,8 +16,20 @@ pub struct Animation {
 
 pub struct Mask {
     pub frames: Vec<Vec<u8>>, // 1 means take a pixel out, 0 means leave alone.
-    pub width: isize,
-    pub height: isize,
+    pub width: usize,
+    pub height: usize,
+}
+
+impl Mask {
+    pub fn as_apng(&self) -> Vec<u8> {
+        let frames: Vec<Vec<u32>> = self.frames.iter().map(|frame|
+            frame.iter().map(|pixel| {
+                if *pixel == 0 { 0 } else {0x888888ff }
+            }).collect()
+        ).collect();
+        let animation = Animation { frames, width: self.width, height: self.height };
+        animation.as_apng()
+    }
 }
 
 impl Image {

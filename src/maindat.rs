@@ -8,10 +8,6 @@ use crate::decompressor;
 
 const SKILL_PANEL_WIDTH: usize = 320;
 const SKILL_PANEL_HEIGHT: usize = 40;
-const SKILL_PANEL_CLICKABLE_HEIGHT: usize = 25; // The panel includes the blank area for text.
-const SKILL_PANEL_BUTTON_WIDTH: usize = 16;
-const SKILL_SELECTION_WIDTH: usize = 17;
-const SKILL_SELECTION_HEIGHT: usize = 25;
 
 pub struct MainDat {
     pub lemming_animations: LemmingAnimations,
@@ -150,8 +146,8 @@ impl LemmingAnimations {
 }
 
 impl Mask {
-    fn parse(data: &[u8], width: isize, height: isize, frame_count: usize) -> Mask {
-        let pixels = (width * height) as usize;
+    fn parse(data: &[u8], width: usize, height: usize, frame_count: usize) -> Mask {
+        let pixels = width * height;
         let mut frames: Vec<Vec<u8>> = Vec::with_capacity(frame_count);
         for frame_index in 0..frame_count {
             let offset_bits = frame_index * pixels;
