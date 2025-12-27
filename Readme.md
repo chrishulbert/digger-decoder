@@ -34,5 +34,10 @@ If you love Commander Keen, please check out my [Dopefish decoder](https://githu
 ## Docs
 
 ![Kessel](https://github.com/chrishulbert/digger-decoder/raw/main/readme/thesteelminesofkessel.png?raw=true)
+![Down along up](https://github.com/chrishulbert/digger-decoder/raw/main/readme/downalongup.png?raw=true)
+![You need bashers](https://github.com/chrishulbert/digger-decoder/raw/main/readme/youneedbashers.png?raw=true)
+![Menacing](https://github.com/chrishulbert/digger-decoder/raw/main/readme/menacing.png?raw=true)
+![Just a minute](https://github.com/chrishulbert/digger-decoder/raw/main/readme/justaminute.png?raw=true)
+![Only floaters](https://github.com/chrishulbert/digger-decoder/raw/main/readme/onlyfloaters.png?raw=true)
 
 Thanks to [camanis.net](https://www.camanis.net/lemmings/files/docs/) for documenting the file formats.
